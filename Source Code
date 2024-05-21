@@ -1,0 +1,133 @@
+#include <stdio.h> 
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;           
+    struct Node* next;  
+    struct Node* prev;  
+} Node;
+
+// Fungsi untuk membuat node baru
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node)); // Mengalokasikan memori untuk node baru
+    newNode->data = data;  // Mengatur data untuk node baru
+    newNode->next = newNode; // Menginisialisasi pointer next untuk menunjuk ke dirinya sendiri
+    newNode->prev = newNode; // Menginisialisasi pointer prev untuk menunjuk ke dirinya sendiri
+    return newNode; // Mengembalikan node yang baru dibuat
+}
+
+// Fungsi untuk menyisipkan node baru di akhir linked list melingkar ganda
+void insertEnd(Node** head, int data) {
+    Node* newNode = createNode(data); // Membuat node baru dengan data yang diberikan
+    if (*head == NULL) {  // Jika daftar kosong
+        *head = newNode;  // Mengatur node baru sebagai kepala
+    } else {  // Jika daftar tidak kosong
+        Node* tail = (*head)->prev;  // Menemukan node terakhir (tail)
+        tail->next = newNode;        // Menyambungkan next dari tail ke node baru
+        newNode->prev = tail;        // Mengatur prev dari node baru ke tail
+        newNode->next = *head;       // Menyambungkan next dari node baru ke kepala
+        (*head)->prev = newNode;     // Mengatur prev dari kepala ke node baru
+    }
+}
+
+// Fungsi untuk mencetak linked list melingkar ganda
+void printList(Node* head) {
+    if (head == NULL) return;  // Jika daftar kosong, kembali
+    Node* temp = head;  // Mulai dari node kepala
+    do {
+        // Mencetak alamat dan data dari node saat ini
+        printf("Alamat : %p, Data : %d\n", (void*)temp, temp->data);
+        temp = temp->next;  // Berpindah ke node berikutnya
+    } while (temp != head); // Teruskan sampai kembali ke kepala
+}
+
+// Fungsi untuk menukar dua node dalam linked list melingkar ganda
+void swapNodes(Node** head, Node* a, Node* b) {
+    if (a == b) return; // Jika node yang ditukar sama, tidak perlu ditukar
+
+    // Menyimpan pointer prev dan next dari kedua node
+    Node* aPrev = a->prev;
+    Node* aNext = a->next;
+    Node* bPrev = b->prev;
+    Node* bNext = b->next;
+
+    // Jika node bersebelahan (a sebelum b)
+    if (aNext == b) {
+        a->next = bNext;
+        b->prev = aPrev;
+        a->prev = b;
+        b->next = a;
+        aPrev->next = b;
+        bNext->prev = a;
+    } 
+    // Jika node bersebelahan (b sebelum a)
+    else if (bNext == a) {
+        b->next = aNext;
+        a->prev = bPrev;
+        b->prev = a;
+        a->next = b;
+        bPrev->next = a;
+        aNext->prev = b;
+    } 
+    // Jika node tidak bersebelahan
+    else {
+        a->next = bNext;
+        a->prev = bPrev;
+        b->next = aNext;
+        b->prev = aPrev;
+        aPrev->next = b;
+        aNext->prev = b;
+        bPrev->next = a;
+        bNext->prev = a;
+    }
+
+    // Mengupdate kepala jika salah satu node yang ditukar adalah kepala
+    if (*head == a) {
+        *head = b;
+    } else if (*head == b) {
+        *head = a;
+    }
+}
+
+// Fungsi untuk mengurutkan linked list circular
+void sortList(Node** head) {
+    if (*head == NULL) return;  // Kembali jika daftar kosong
+
+    Node* current = *head;  // Mulai dari node kepala
+    Node* index = NULL;     // Pointer untuk menjelajahi daftar
+    int swapped;  // Flag untuk memeriksa apakah ada pertukaran yang dilakukan
+
+    do {
+        swapped = 0;  // Mereset flag swapped
+        current = *head;  // Mulai dari node kepala
+
+        while (current->next != *head) {
+            index = current->next;  // Mengambil node berikutnya
+            if (current->data > index->data) {  // Jika data node saat ini lebih besar
+                swapNodes(head, current, index);  // Tukar node
+                swapped = 1;  // Mengatur flag swapped
+            } else {
+                current = current->next;  // Berpindah ke node berikutnya
+            }
+        }
+    } while (swapped);  // Ulangi sampai tidak ada pertukaran yang dilakukan
+}
+
+// program utama
+int main() {
+    Node* head = NULL;  // Menginisialisasi head
+    int n, a;
+    printf("Berapa data yang ingin diinput: ");  // Meminta jumlah input
+    scanf("%d", &n);  // Menginput data
+    for (int i = 0; i < N; i++) {
+        scanf("%d", &a);  // Menginput data
+        insertEnd(&head, a);  // Memanggil fungsi InsertEnd
+    }
+    printf("Data sebelum diurutkan:\n");  // Mengoutput tulisan
+    printList(head);  // Memanggil fungsi printList
+    sortList(&head);  // Memanggil fungsi sortList
+    printf("Data setelah diurutkan:\n");  // Mengoutput tulisan
+    printList(head);  // Memanggil fungsi printList
+
+    return 0; 
+}
